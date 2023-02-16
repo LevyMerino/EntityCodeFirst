@@ -1,5 +1,7 @@
 using DB;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.Xml;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,8 @@ builder.Services.AddDbContext<HirCasaContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionHIRCasa"));
 });
+
+builder.Services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
 var app = builder.Build();

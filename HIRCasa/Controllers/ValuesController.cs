@@ -1,5 +1,4 @@
 ﻿using DB;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,19 +15,22 @@ namespace HIRCasa.Controllers
             _context = context;
         }
 
+
+
         [HttpGet]
+        [Route("Obtener")]
         public IEnumerable<Cliente> Get()
         {
-            return _context.Clientes.ToList();
+            return _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList();
 
         }
 
         [HttpPut]
+        [Route("LimpiarNombres")]
         public IActionResult ActionCleanName()
         {
             try
             {
-
                 foreach (var item in _context.Clientes.ToList())
                 {
                     if (!String.IsNullOrEmpty(item.Nombre))
@@ -39,42 +41,80 @@ namespace HIRCasa.Controllers
                     }
                 }
 
-                var montosPagados = _context.Pagos.Where(c => c.ClienteId == 8).Select(m => m.MontoPagado).ToList();
-                Ajuste clienteAjuste = _context.Ajustes.Where(m => m.ClienteId == 8).First();
+                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
 
-                // 2
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status304NotModified, new { message = ex });
+            }
+        }
+
+        [HttpPut]
+        [Route("ActulizarMontoTotal")]
+        public IActionResult MontoTotal(int id = 8)
+        {
+            try
+            {
+                List<string?> montosPagados = new();
+
+                montosPagados = _context.Pagos.Where(c => c.ClienteId == id).Select(m => m.MontoPagado).ToList();
 
                 if (montosPagados is not null)
                 {
+                    Ajuste ajuste = _context.Ajustes.Where(m => m.ClienteId == id).First();
 
-                    clienteAjuste.MontoTotal = Pago.SumarMontos(montosPagados);
-                    _context.Ajustes.Update(clienteAjuste);
+                    ajuste.MontoTotal = Pago.SumarMontos(montosPagados);
+                    _context.Ajustes.Update(ajuste);
                     _context.SaveChanges();
                 }
 
-                // 3 
+                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
 
-                Ajuste clienteAjuste2 = _context.Ajustes.Include(c => c.Clientes).Where(c => c.ClienteId == 8).First();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status304NotModified, new { message = ex });
+            }
+        }
 
-                if (clienteAjuste2.Clientes is not null)
+
+        [HttpPut]
+        [Route("ActulizarAdeudo")]
+        public IActionResult Adeudo()
+        {
+            try
+            {
+                Ajuste clienteAjuste = _context.Ajustes.Include(c => c.Clientes).Where(c => c.ClienteId == 8).First();
+
+                if (clienteAjuste.Clientes is not null)
                 {
-                    if (clienteAjuste2.Clientes.MontoSolicitud is not null && clienteAjuste2.MontoTotal is not null)
+                    if (clienteAjuste.Clientes.MontoSolicitud is not null && clienteAjuste.MontoTotal is not null)
                     {
 
-                        clienteAjuste2.Adeudo = Ajuste.CalcularAdeudo(clienteAjuste2.Clientes.MontoSolicitud, clienteAjuste2.MontoTotal);
+                        clienteAjuste.Adeudo = Ajuste.CalcularAdeudo(clienteAjuste.Clientes.MontoSolicitud, clienteAjuste.MontoTotal);
 
-                        _context.Ajustes.Update(clienteAjuste2);
+                        _context.Ajustes.Update(clienteAjuste);    
                         _context.SaveChanges();
 
                     }
                 }
 
+                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status304NotModified, new { message = ex });
+            }
+        }
 
-
-
-                // 4
-
+        [HttpPut]
+        [Route("ActualizarEstatus")]
+        public IActionResult Estatus()
+        {
+            try
+            {
                 List<Cliente> clientes = _context.Clientes.Include(a => a.Ajustes).ToList();
 
                 foreach (var cliente in clientes)
@@ -111,19 +151,51 @@ namespace HIRCasa.Controllers
                     }
                 }
 
-                // 5
-
-
-
-
-
 
                 return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
+
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status304NotModified, new { message = ex });
             }
         }
+
+        [HttpPut]
+        [Route("ActualizarAprobacion")]
+        public IActionResult Aprobacion()
+        {
+            try
+            {
+                List<Cliente> clientes2 = _context.Clientes.ToList();
+
+                foreach (var cliente in clientes2)
+                {
+                    if (!String.IsNullOrEmpty(cliente.Estatus))
+                    {
+                        if (cliente.Estatus.Contains("Adeudo") || cliente.Estatus.Contains("corriente"))
+                        {
+                            cliente.Aprobación = 1;
+                        }
+                        else
+                        {
+                            cliente.Aprobación = 0;
+                        }
+                    }
+
+                    _context.Clientes.Update(cliente);
+                    _context.SaveChanges();
+
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status304NotModified, new { message = ex });
+            }
+        }
+
     }
 }

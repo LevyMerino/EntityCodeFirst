@@ -21,15 +21,18 @@ namespace DB
         public int Aplicado { get; set; }
         public DateTime FechaPago { get; set; }
 
-        public static string SumarMontos(List<string> montos)
+        public static string SumarMontos(List<string?> montos)
         {
 
             float totalMontos = 0;
 
             foreach (var monto in montos)
             {
-                var split = monto.Split("$"); 
-                totalMontos += float.Parse(split[1]);
+                if(monto is not null)
+                {
+                    var split = monto.Split("$");
+                    totalMontos += float.Parse(split[1]);
+                }
             }
 
             return "$" + totalMontos.ToString("0.00");

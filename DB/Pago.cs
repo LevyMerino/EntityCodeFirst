@@ -32,7 +32,7 @@ namespace DB
                 totalMontos += float.Parse(split[1]);
             }
 
-            return totalMontos.ToString("0.00");
+            return "$" + totalMontos.ToString("0.00");
         }
 
     }

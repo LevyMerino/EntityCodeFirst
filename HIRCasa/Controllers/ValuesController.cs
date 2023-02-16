@@ -21,5 +21,13 @@ namespace HIRCasa.Controllers
             return _context.Clientes.ToList();
 
         }
+
+        //[HttpPut]
+        //public ActionResult LimpiarNombres()
+        //{
+        //    return Json("ok");
+
+        //}
+
     }
 }

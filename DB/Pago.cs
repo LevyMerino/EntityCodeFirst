@@ -11,6 +11,7 @@ namespace DB
     public class Pago
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int PagoId { get; set; }
         public int ClienteId { get; set; }
         [ForeignKey("ClienteId")]

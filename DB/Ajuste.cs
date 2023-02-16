@@ -11,6 +11,7 @@ namespace DB
     public class Ajuste
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int AjusteId { get; set; }
         public int ClienteId { get; set; }
         [ForeignKey("ClienteId")]

@@ -23,5 +23,21 @@ namespace DB
         public DateTime FechaAlta { get; set; }
         public virtual ICollection<Pago>? Pagos { get; set; }
         public virtual ICollection<Ajuste>? Ajustes { get; set; }
+
+        public static string CleanName(string Nombre)
+        {
+            List<string> nombres = new();
+            var splitNombre = Nombre.Split(" ");
+
+            foreach (var item in splitNombre)
+            {
+                if (!String.IsNullOrEmpty(item))
+                {
+                    nombres.Add(item);
+                }
+            }
+
+            return $"{nombres[0].Trim()} {nombres[1].Trim()} {nombres[2].Trim()}";
+        }
     }
 }

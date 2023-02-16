@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,5 +20,20 @@ namespace DB
         public string? MontoPagado { get; set; }
         public int Aplicado { get; set; }
         public DateTime FechaPago { get; set; }
+
+        public static string SumarMontos(List<string> montos)
+        {
+
+            float totalMontos = 0;
+
+            foreach (var monto in montos)
+            {
+                var split = monto.Split("$"); 
+                totalMontos += float.Parse(split[1]);
+            }
+
+            return totalMontos.ToString("0.00");
+        }
+
     }
 }

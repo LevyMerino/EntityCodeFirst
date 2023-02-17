@@ -21,7 +21,6 @@ namespace HIRCasa.Controllers
         public IEnumerable<Cliente> Get()
         {
             return _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList();
-
         }
 
         // 1
@@ -31,12 +30,12 @@ namespace HIRCasa.Controllers
         {
             try
             {
-                foreach (var item in _context.Clientes.ToList())
+                foreach (var cliente in _context.Clientes.ToList())
                 {
-                    if (!String.IsNullOrEmpty(item.Nombre))
+                    if (!String.IsNullOrEmpty(cliente.Nombre))
                     {
-                        item.Nombre = Cliente.CleanName(item.Nombre);
-                        _context.Clientes.Update(item);
+                        cliente.Nombre = Cliente.CleanName(cliente.Nombre);
+                        _context.Clientes.Update(cliente);
                         _context.SaveChanges();
                     }
                 }
@@ -55,7 +54,7 @@ namespace HIRCasa.Controllers
 
         // 2
         [HttpPut]
-        [Route("ActulizarMontoTotal")]
+        [Route("ActualizarMontoTotal")]
         public IActionResult MontoTotal(int ClienteId = 8)
         {
             try
@@ -158,10 +157,6 @@ namespace HIRCasa.Controllers
                                 cliente.Estatus = "Cancelación";
                             }
                         }
-                        else
-                        {
-                            cliente.Estatus = "Cancelación";
-                        }
 
                         _context.Clientes.Update(cliente);
                         _context.SaveChanges();
@@ -190,13 +185,13 @@ namespace HIRCasa.Controllers
         {
             try
             {
-                List<Cliente> clientes2 = _context.Clientes.ToList();
+                List<Cliente> clientes = _context.Clientes.ToList();
 
-                foreach (var cliente in clientes2)
+                foreach (var cliente in clientes)
                 {
                     if (!String.IsNullOrEmpty(cliente.Estatus))
                     {
-                        if (cliente.Estatus.Contains("Adeudo") || cliente.Estatus.Contains("corriente"))
+                        if (cliente.Estatus.ToLower().Contains("adeudo") || cliente.Estatus.ToLower().Contains("corriente"))
                         {
                             cliente.Aprobación = 1;
                         }
@@ -204,11 +199,11 @@ namespace HIRCasa.Controllers
                         {
                             cliente.Aprobación = 0;
                         }
+
+                        _context.Clientes.Update(cliente);
+                        _context.SaveChanges();
+
                     }
-
-                    _context.Clientes.Update(cliente);
-                    _context.SaveChanges();
-
                 }
 
                 return StatusCode(StatusCodes.Status200OK, new

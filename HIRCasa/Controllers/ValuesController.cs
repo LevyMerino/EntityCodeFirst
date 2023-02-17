@@ -1,6 +1,7 @@
 ﻿using DB;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HIRCasa.Controllers
 {
@@ -15,16 +16,15 @@ namespace HIRCasa.Controllers
             _context = context;
         }
 
-
-
         [HttpGet]
-        [Route("Obtener")]
+        [Route("TodosLosDatos")]
         public IEnumerable<Cliente> Get()
         {
             return _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList();
 
         }
 
+        // 1
         [HttpPut]
         [Route("LimpiarNombres")]
         public IActionResult ActionCleanName()
@@ -41,8 +41,11 @@ namespace HIRCasa.Controllers
                     }
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
-
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    message = "Ok",
+                    data = _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList()
+                });
             }
             catch (Exception ex)
             {
@@ -50,26 +53,35 @@ namespace HIRCasa.Controllers
             }
         }
 
+        // 2
         [HttpPut]
         [Route("ActulizarMontoTotal")]
-        public IActionResult MontoTotal(int id = 8)
+        public IActionResult MontoTotal(int ClienteId = 8)
         {
             try
             {
                 List<string?> montosPagados = new();
 
-                montosPagados = _context.Pagos.Where(c => c.ClienteId == id).Select(m => m.MontoPagado).ToList();
+                montosPagados = _context.Pagos.Where(c => c.ClienteId == ClienteId).Select(m => m.MontoPagado).ToList();
 
-                if (montosPagados is not null)
+                if (!montosPagados.IsNullOrEmpty())
                 {
-                    Ajuste ajuste = _context.Ajustes.Where(m => m.ClienteId == id).First();
+                    Ajuste ajuste = _context.Ajustes.Where(m => m.ClienteId == ClienteId).First();
 
                     ajuste.MontoTotal = Pago.SumarMontos(montosPagados);
                     _context.Ajustes.Update(ajuste);
                     _context.SaveChanges();
                 }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "El cliente no tiene montos generados" });
+                }
 
-                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    message = "Ok",
+                    data = _context.Ajustes.Where(a => a.ClienteId == ClienteId)
+                });
 
             }
             catch (Exception ex)
@@ -78,14 +90,14 @@ namespace HIRCasa.Controllers
             }
         }
 
-
+        // 3
         [HttpPut]
-        [Route("ActulizarAdeudo")]
-        public IActionResult Adeudo()
+        [Route("ActualizarAdeudo")]
+        public IActionResult Adeudo(int ClienteId = 8)
         {
             try
             {
-                Ajuste clienteAjuste = _context.Ajustes.Include(c => c.Clientes).Where(c => c.ClienteId == 8).First();
+                Ajuste clienteAjuste = _context.Ajustes.Include(c => c.Clientes).Where(c => c.ClienteId == ClienteId).First();
 
                 if (clienteAjuste.Clientes is not null)
                 {
@@ -94,11 +106,16 @@ namespace HIRCasa.Controllers
 
                         clienteAjuste.Adeudo = Ajuste.CalcularAdeudo(clienteAjuste.Clientes.MontoSolicitud, clienteAjuste.MontoTotal);
 
-                        _context.Ajustes.Update(clienteAjuste);    
+                        _context.Ajustes.Update(clienteAjuste);
                         _context.SaveChanges();
 
                     }
+                    else
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Faltan datos para actualizar el adeudo" });
+                    }
                 }
+
 
                 return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
 
@@ -109,6 +126,7 @@ namespace HIRCasa.Controllers
             }
         }
 
+        // 4
         [HttpPut]
         [Route("ActualizarEstatus")]
         public IActionResult Estatus()
@@ -152,7 +170,11 @@ namespace HIRCasa.Controllers
                 }
 
 
-                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    message = "Ok",
+                    data = _context.Clientes.ToList()
+                });
 
             }
             catch (Exception ex)
@@ -161,6 +183,7 @@ namespace HIRCasa.Controllers
             }
         }
 
+        // 5
         [HttpPut]
         [Route("ActualizarAprobacion")]
         public IActionResult Aprobacion()
@@ -188,7 +211,11 @@ namespace HIRCasa.Controllers
 
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { message = "Ok" });
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    message = "Ok",
+                    data = _context.Clientes.ToList()
+                });
 
             }
             catch (Exception ex)

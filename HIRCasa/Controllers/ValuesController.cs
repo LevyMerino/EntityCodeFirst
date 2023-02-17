@@ -23,7 +23,7 @@ namespace HIRCasa.Controllers
             return _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList();
         }
 
-        // 1
+        //Punto 1
         [HttpPut]
         [Route("LimpiarNombres")]
         public IActionResult ActionCleanName()
@@ -34,7 +34,7 @@ namespace HIRCasa.Controllers
                 {
                     if (!String.IsNullOrEmpty(cliente.Nombre))
                     {
-                        cliente.Nombre = Cliente.CleanName(cliente.Nombre);
+                        cliente.Nombre = Cliente.QuitarEspacios(cliente.Nombre); // El metodo QuitarEspacios se encuentra en la clase Cliente
                         _context.Clientes.Update(cliente);
                         _context.SaveChanges();
                     }
@@ -43,7 +43,7 @@ namespace HIRCasa.Controllers
                 return StatusCode(StatusCodes.Status200OK, new
                 {
                     message = "Ok",
-                    data = _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList()
+                    data = _context.Clientes.Include(p => p.Pagos).Include(a => a.Ajustes).ToList() 
                 });
             }
             catch (Exception ex)
@@ -52,7 +52,7 @@ namespace HIRCasa.Controllers
             }
         }
 
-        // 2
+        //Punto 2
         [HttpPut]
         [Route("ActualizarMontoTotal")]
         public IActionResult MontoTotal(int ClienteId = 8)
@@ -67,7 +67,7 @@ namespace HIRCasa.Controllers
                 {
                     Ajuste ajuste = _context.Ajustes.Where(m => m.ClienteId == ClienteId).First();
 
-                    ajuste.MontoTotal = Pago.SumarMontos(montosPagados);
+                    ajuste.MontoTotal = Pago.SumarMontos(montosPagados); // El metodo SumarMontos se encuentra en la clase Pago
                     _context.Ajustes.Update(ajuste);
                     _context.SaveChanges();
                 }
@@ -89,7 +89,7 @@ namespace HIRCasa.Controllers
             }
         }
 
-        // 3
+        //Punto 3
         [HttpPut]
         [Route("ActualizarAdeudo")]
         public IActionResult Adeudo(int ClienteId = 8)
@@ -103,7 +103,7 @@ namespace HIRCasa.Controllers
                     if (clienteAjuste.Clientes.MontoSolicitud is not null && clienteAjuste.MontoTotal is not null)
                     {
 
-                        clienteAjuste.Adeudo = Ajuste.CalcularAdeudo(clienteAjuste.Clientes.MontoSolicitud, clienteAjuste.MontoTotal);
+                        clienteAjuste.Adeudo = Ajuste.CalcularAdeudo(clienteAjuste.Clientes.MontoSolicitud, clienteAjuste.MontoTotal); // El metodo CalcularAdeudo se encuentra en la clase Ajuste como miembro estatico
 
                         _context.Ajustes.Update(clienteAjuste);
                         _context.SaveChanges();
@@ -125,7 +125,7 @@ namespace HIRCasa.Controllers
             }
         }
 
-        // 4
+        //Punto 4
         [HttpPut]
         [Route("ActualizarEstatus")]
         public IActionResult Estatus()
@@ -178,7 +178,7 @@ namespace HIRCasa.Controllers
             }
         }
 
-        // 5
+        //Punto 5
         [HttpPut]
         [Route("ActualizarAprobacion")]
         public IActionResult Aprobacion()

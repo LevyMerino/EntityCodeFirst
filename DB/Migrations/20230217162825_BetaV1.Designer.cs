@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(HirCasaContext))]
-    [Migration("20230216030459_Beta")]
-    partial class Beta
+    [Migration("20230217162825_BetaV1")]
+    partial class BetaV1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

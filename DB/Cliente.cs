@@ -24,7 +24,7 @@ namespace DB
         public virtual ICollection<Pago>? Pagos { get; set; }
         public virtual ICollection<Ajuste>? Ajustes { get; set; }
 
-        public static string CleanName(string Nombre)
+        public static string QuitarEspacios(string Nombre)
         {
             List<string> nombres = new();
             var splitNombre = Nombre.Split(" ");

@@ -22,11 +22,10 @@ namespace DB
 
         public static string CalcularAdeudo (string srtMontoSolicitado, string strMontoTotal)
         {
-            float adeudo = 0;
+            float adeudo;
             float montoSolicitado;
             float montoTotal;
-
-            var str = strMontoTotal.Split("$");
+     
             montoTotal = float.Parse(strMontoTotal.Split("$")[1]);
             montoSolicitado = float.Parse(srtMontoSolicitado.Split("$")[1]);
 

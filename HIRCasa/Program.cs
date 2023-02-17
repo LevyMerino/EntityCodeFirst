@@ -22,7 +22,7 @@ builder.Services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOption
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope()) // Migracion
 {
     var context = scope.ServiceProvider.GetRequiredService<HirCasaContext>(); 
     context.Database.Migrate();
